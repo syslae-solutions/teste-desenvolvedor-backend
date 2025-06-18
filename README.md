@@ -33,7 +33,6 @@ Desenvolver uma aplicação web com Laravel para controle de **estacionamento ro
 
 - Todos os módulos devem expor endpoints JSON completos (CRUD e operações).
 - Usar `Resource` e `FormRequest` do Laravel.
-- Rotas devem ser versionadas: `/api/v1/...`.
 
 ---
 
