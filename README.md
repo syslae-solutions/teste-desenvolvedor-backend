@@ -67,7 +67,7 @@ Desenvolver uma aplicação web com Laravel para controle de **estacionamento ro
 
 - Para iniciar o teste, faça um fork deste repositório; Se você apenas clonar o repositório não vai conseguir fazer push.
 - Crie uma branch com o seu nome completo;
-- Altere o arquivo teste-pleno.md com as informações necessárias para executar o seu teste (comandos, migrations, seeds, etc);
+- Altere o arquivo README.md com as informações necessárias para executar o seu teste (comandos, migrations, seeds, etc);
 - Depois de finalizado, envie-nos o pull request;
 
 ---
