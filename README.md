@@ -58,7 +58,7 @@ Desenvolver uma aplicação web com Laravel para controle de **estacionamento ro
   - Vagas ocupadas em tempo real.
   - Total de veículos por dia.
   - Receita gerada por período.
-- Exportação CSV do histórico de estacionamento.
+- PDF do histórico de estacionamento.
 - Testes de API (`Feature Tests`) com cobertura mínima para entrada/saída e regras de negócio.
 
 ---
