@@ -1,82 +1,143 @@
-# Teste Técnico – Desenvolvedor PHP Pleno
+# Teste Técnico – Estacionamento Rotativo Urbano
 
-## Objetivo
+Este projeto é a solução para o teste técnico de Desenvolvedor PHP Pleno, focado na construção de uma API RESTful completa para um sistema de estacionamento rotativo urbano. Adicionalmente, inclui um dashboard administrativo como funcionalidade bônus.
 
-Desenvolver uma aplicação web com Laravel para controle de **estacionamento rotativo urbano**. A aplicação deve permitir registrar veículos, vagas e operações de entrada/saída. Toda a aplicação deve ser exposta via **API REST JSON**.
+## Sumário das Funcionalidades
 
----
+* **Autenticação de Usuários:**
+    * Endpoints para registro (`/register`) e login (`/login`) de usuários, utilizando Laravel Sanctum para autenticação via token.
+* **CRUD de Vagas:**
+    * Gerenciamento completo (Criar, Ler, Atualizar, Deletar) de vagas de estacionamento.
+    * Campos como `código`, `rua`, `numero`, `bairro` e `status` (livre, ocupada, interditada).
+    * Suporte a paginação, ordenação e filtros por status e localização.
+* **CRUD de Veículos:**
+    * Gerenciamento completo (Criar, Ler, Atualizar, Deletar) de veículos.
+    * Campos incluem `placa`, `modelo`, `cor` e `tipo` (carro, moto).
+    * Validação de placa no padrão Mercosul.
+    * Um veículo pode ter múltiplas entradas no histórico de estacionamento.
+* **Operações de Estacionamento:**
+    * **Registrar Entrada:** Permite registrar a entrada de um veículo em uma vaga específica.
+        * **Regra:** Não permite entrada se a vaga estiver `ocupada` ou `interditada`.
+    * **Registrar Saída:** Registra a saída de um veículo, calculando automaticamente o tempo total de permanência e o valor a ser pago (com base em R$ 2,00/hora, fracionado).
+        * **Regra:** Não permite saída se o veículo não estiver atualmente estacionado.
+* **API RESTful:**
+    * Todos os módulos e operações são expostos via endpoints JSON, seguindo os princípios RESTful.
+    * Utiliza recursos do Laravel como `Resource` para formatação das respostas e `FormRequest` para validação de requisições.
+* **Dashboard HTML (Bônus):**
+    * Um painel administrativo para visualização rápida de métricas importantes:
+        * Número de vagas ocupadas em tempo real e percentual de ocupação.
+        * Total de veículos que entraram/saíram no dia atual.
+        * Receita total gerada por diferentes períodos (hoje, esta semana, este mês).
+    * **Geração de PDF:** Permite gerar um relatório em PDF com o histórico detalhado de estacionamentos.
 
-## Funcionalidades obrigatórias
+## Requisitos do Sistema
 
-### CRUD de Vagas
+Para rodar este projeto, você precisará ter instalado em sua máquina:
 
-- Campos: código da vaga, localização (rua, número, bairro), status (livre, ocupada, interditada).
-- Paginação, ordenação e filtros por status e localização.
+* **Docker:** Para gerenciar o ambiente de desenvolvimento (PHP, Nginx, MySQL).
+* **Docker Compose:** Ferramenta para definir e rodar aplicativos Docker multi-contêiner.
 
-### CRUD de Veículos
+## Como Configurar e Rodar o Projeto
 
-- Campos: placa, modelo, cor, tipo (carro, moto).
-- Validação da placa (Mercosul).
-- Um veículo pode ter múltiplas entradas no histórico.
+Siga os passos abaixo para colocar a aplicação em funcionamento:
 
-### Operações de Estacionamento
+1.  **Clone o Repositório:**
+    Abra seu terminal e clone o projeto para o seu ambiente local.
+    ```bash
+    git clone https://github.com/HEITORNERY/teste-desenvolvedor-backend.git
+    ```
 
-- Registrar entrada de um veículo em uma vaga.
-- Registrar saída, calculando tempo total e valor (ex: R$ 2,00/hora, fracionado).
-- Regras:
-  - Não permitir entrada se a vaga estiver ocupada ou interditada.
-  - Não permitir saída se o veículo não estiver estacionado.
+2.  **Configurar o Ambiente Docker com Sail:**
+    O projeto utiliza [Laravel Sail](https://laravel.com/docs/sail) para um ambiente de desenvolvimento Docker leve e pré-configurado.
 
----
+    * **Inicie os Contêineres:**
+        Este comando construirá as imagens Docker (se for a primeira vez) e iniciará os serviços (PHP, Nginx, MySQL) em segundo plano.
+        ```bash
+        cd estacionamento-api
+        ./vendor/bin/sail up -d
+        ```
+        Aguarde alguns instantes para que todos os serviços estejam completamente online.
 
-## API REST
+    * **Instalar Dependências do Composer:**
+        Entre no contêiner `laravel.test` (o serviço PHP) e instale todas as dependências do projeto via Composer.
+        ```bash
+        cd estacionamento-api
+        ./vendor/bin/sail composer install
+        ```
 
-- Todos os módulos devem expor endpoints JSON completos (CRUD e operações).
-- Usar `Resource` e `FormRequest` do Laravel.
+3.  **Executar Migrações e Seeds do Banco de Dados:**
+    As migrações criarão as tabelas necessárias no seu banco de dados, e os seeders podem ser usados para popular o banco com dados de teste, como um usuário inicial e algumas vagas/veículos.
 
----
+    * **Execute as Migrações e Seeds:**
+        ```bash
+        cd estacionamento-api
+        ./vendor/bin/sail artisan migrate --seed
+        ```
+    * **Dados de Teste (Exemplo de Seeder):**
+        O seeder padrão (`database/seeders/DatabaseSeeder.php`) pode ser configurado para criar um usuário administrativo padrão para que você possa testar a autenticação.
+        Se você alterou o seeder, execute o comando `migrate:fresh --seed` (ATENÇÃO: apaga e recria o banco) ou `db:seed` (apenas roda os seeds):
+        ```bash
+        cd estacionamento-api
+        ./vendor/bin/sail artisan migrate:fresh --seed
+        # OU
+        cd estacionamento-api
+        ./vendor/bin/sail artisan db:seed
+        ```
 
-## Autenticação
+5.  **Acessar a Aplicação:**
+    Após todos os passos anteriores, sua aplicação estará rodando.
 
-- A API deve requerer autenticação via **token** (Laravel Sanctum ou Passport).
-- Criar usuário via seed ou endpoint `/register`.
+    * **API RESTful:** A base da API estará disponível em `http://localhost/api/`.
+    * **Dashboard HTML (Bônus):** O painel administrativo estará acessível em `http://localhost/dashboard`.
 
----
+## Endpoints da API
 
-## Requisitos Técnicos
+Para interagir com a API, você precisará de um cliente HTTP (como Postman, Insomnia ou Thunder Client para VS Code).
 
-- Laravel (última versão).
-- Docker com `docker-compose` (banco e app).
-- Banco: MySQL ou PostgreSQL.
-- Migrations, Seeders e Factories obrigatórios.
+### **Autenticação**
 
----
+| Método | Endpoint                    | Descrição                                                              | Corpo da Requisição (JSON)                      | Resposta de Sucesso (Exemplo)                           | Status |
+| :----- | :-------------------------- | :--------------------------------------------------------------------- | :---------------------------------------------- | :------------------------------------------------------ | :----- |
+| `POST` | `/api/register`             | Registra um novo usuário e retorna um token de acesso.                 | `{ "name": "...", "email": "...", "password": "...", "password_confirmation": "..." }` | `{ "message": "...", "token": "...", "user": {} }`      | `201`  |
+| `POST` | `/api/login`                | Realiza login com credenciais e retorna um novo token de acesso.      | `{ "email": "...", "password": "..." }`       | `{ "message": "...", "token": "...", "user": {} }`      | `200`  |
+| `POST` | `/api/logout`               | Invalida o token de acesso do usuário autenticado.                      | (Nenhum)                                        | `{ "message": "Logout bem-sucedido!" }`                 | `200`  |
+| `GET`  | `/api/user`                 | Retorna os dados do usuário atualmente autenticado.                    | (Nenhum)                                        | `{ "id": ..., "name": "...", "email": "..." }`          | `200`  |
 
-## Bônus
+* **Header de Autenticação:** Para todas as rotas protegidas (marcadas com `Sim` na tabela abaixo), você deve incluir o seguinte header na requisição:
+    `Authorization: Bearer <seu_token_aqui>`
 
-- Dashboard HTML com:
-  - Vagas ocupadas em tempo real.
-  - Total de veículos por dia.
-  - Receita gerada por período.
-- PDF do histórico de estacionamento.
-- Testes de API (`Feature Tests`) com cobertura mínima para entrada/saída e regras de negócio.
+### **Veículos**
 
----
+| Método | Endpoint                    | Descrição                          | Corpo da Requisição (JSON)                                | Requer Auth |
+| :----- | :-------------------------- | :--------------------------------- | :-------------------------------------------------------- | :---------- |
+| `GET`  | `/api/veiculos`             | Lista todos os veículos.            | (Nenhum)                                                  | Sim         |
+| `POST` | `/api/veiculos`             | Cria um novo veículo.              | `{ "placa": "ABC1D23", "modelo": "Gol", "cor": "Preto", "tipo": "carro" }` | Sim         |
+| `GET`  | `/api/veiculos/{id}`        | Exibe detalhes de um veículo.      | (Nenhum)                                                  | Sim         |
+| `PUT`  | `/api/veiculos/{id}`        | Atualiza um veículo existente.     | `{ "placa": "XYZ9L87", "cor": "Azul" }` (apenas campos a atualizar) | Sim         |
+| `DELETE`| `/api/veiculos/{id}`        | Exclui um veículo.                 | (Nenhum)                                                  | Sim         |
 
-## Entrega
+### **Vagas**
 
-- Para iniciar o teste, faça um fork deste repositório; Se você apenas clonar o repositório não vai conseguir fazer push.
-- Crie uma branch com o seu nome completo;
-- Altere o arquivo README.md com as informações necessárias para executar o seu teste (comandos, migrations, seeds, etc);
-- Depois de finalizado, envie-nos o pull request;
+| Método | Endpoint                    | Descrição                                  | Corpo da Requisição (JSON)                                              | Requer Auth |
+| :----- | :-------------------------- | :----------------------------------------- | :---------------------------------------------------------------------- | :---------- |
+| `GET`  | `/api/vagas`                | Lista todas as vagas (suporta filtros e paginação: `?status=livre&page=1`). | (Nenhum)                                                                | Sim         |
+| `POST` | `/api/vagas`                | Cria uma nova vaga.                        | `{ "codigo": "VAGA-A01", "localizacao_rua": "Rua Principal", "localizacao_numero": "123", "localizacao_bairro": "Centro", "status": "livre" }` | Sim         |
+| `GET`  | `/api/vagas/{id}`           | Exibe detalhes de uma vaga.                | (Nenhum)                                                                | Sim         |
+| `PUT`  | `/api/vagas/{id}`           | Atualiza uma vaga existente.               | `{ "status": "interditada" }` (apenas campos a atualizar)               | Sim         |
+| `DELETE`| `/api/vagas/{id}`           | Exclui uma vaga.                           | (Nenhum)                                                                | Sim         |
 
----
+### **Estacionamento (Operações de Entrada e Saída)**
 
-## Critérios de Avaliação
+| Método | Endpoint                    | Descrição                                         | Corpo da Requisição (JSON)                                      | Requer Auth |
+| :----- | :-------------------------- | :------------------------------------------------ | :-------------------------------------------------------------- | :---------- |
+| `POST` | `/api/estacionamento/entrada` | Registra a entrada de um veículo em uma vaga.     | `{ "veiculo_id": 1, "vaga_id": 1 }`                             | Sim         |
+| `PUT`  | `/api/estacionamento/saida/{id}` | Registra a saída e calcula o valor total. `id` é o ID do registro de estacionamento (não do veículo ou vaga). | (Nenhum)                                                        | Sim         |
+| `GET`  | `/api/estacionamento`       | Lista todos os registros de estacionamento.      | (Nenhum)                                                        | Sim         |
+| `GET`  | `/api/estacionamento/{id}`  | Exibe detalhes de um registro de estacionamento. | (Nenhum)                                                        | Sim         |
 
-- Clareza e legibilidade do código.
-- Separação de responsabilidades.
-- Uso correto de recursos do Laravel.
-- API bem estruturada (RESTful, validações, status codes).
-- Clean Code, SOLID, testes.
-- Setup funcional com Docker.
+## Dashboard e Relatório PDF
+
+* **Dashboard HTML:**
+    * Acesse `http://localhost/dashboard` no seu navegador web para visualizar as métricas em tempo real do sistema de estacionamento.
+* **Gerar PDF do Histórico:**
+    * No Dashboard, clique no botão "Gerar PDF do Histórico de Estacionamento" para baixar um relatório em PDF com os detalhes das operações de estacionamento.
