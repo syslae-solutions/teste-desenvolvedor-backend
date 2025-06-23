@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html # Mapeia sua pasta local para o contêiner
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+    environment:
+      # Variáveis de ambiente Laravel (serão configuradas no .env, mas estas são para o contêiner)
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: laravel
+      DB_USERNAME: root
+      DB_PASSWORD: 1234567 # Senha do app Laravel e do usuário root do MySQL
+      SANCTUM_STATEFUL_DOMAINS: localhost,localhost:8000
+      APP_URL: http://localhost:8000
+      APP_KEY: base64:q5HoK98bAYtFWIhmc5gt+j1ZmqhBA0TlqLveutdyjag=I # <<< APP_KEY GERADA >>>
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    # command: sh -c "chmod -R 777 storage bootstrap/cache && php-fpm"
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "8000:80" # Mapeia a porta 8000 do seu host para a porta 80 do Nginx
+    volumes:
+      - .:/var/www/html # Mapeia sua pasta local para o contêiner
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf # Mapeia a configuração do Nginx
+    depends_on:
+      - app # Nginx depende do app (PHP-FPM)
+
+  mysql: # Serviço de banco de dados MySQL
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "3306:3306" # Mapeia a porta 3306 do seu host para a porta 3306 do MySQL
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234567 # Senha do usuário root do MySQL (Sincronizada com o app)
+      MYSQL_DATABASE: laravel # Nome do banco de dados
+      MYSQL_USER: user # Usuário adicional (não usaremos root direto no Laravel)
+      MYSQL_PASSWORD: password # Senha para o usuário adicional
+    volumes:
+      - dbdata:/var/lib/mysql # Volume persistente para os dados do MySQL
+    dns: # Servidores DNS públicos para o contêiner MySQL também
+      - 8.8.8.8
+      - 8.8.4.4
+
+volumes:
+  dbdata: # Definição do volume persistente

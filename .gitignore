@@ -1,0 +1,34 @@
+# ---------------------------------------
+# React (pasta: estacionamento-frontend)
+# ---------------------------------------
+/estacionamento-frontend/node_modules/
+/estacionamento-frontend/coverage/
+/estacionamento-frontend/*.log
+/estacionamento-frontend/*.tsbuildinfo
+
+# ---------------------------------------
+# PHP Backend (pasta: teste-desenvolvedor-backend)
+# ---------------------------------------
+/teste-desenvolvedor-backend/vendor/
+/teste-desenvolvedor-backend/.env
+/teste-desenvolvedor-backend/.env.*
+/teste-desenvolvedor-backend/*.log
+/teste-desenvolvedor-backend/storage/*.key
+/teste-desenvolvedor-backend/storage/*.log
+/teste-desenvolvedor-backend/storage/framework/*
+!/teste-desenvolvedor-backend/storage/framework/.gitignore
+/teste-desenvolvedor-backend/storage/logs/*
+!/teste-desenvolvedor-backend/storage/logs/.gitignore
+/teste-desenvolvedor-backend/bootstrap/cache/*
+!/teste-desenvolvedor-backend/bootstrap/cache/.gitignore
+/teste-desenvolvedor-backend/composer.lock
+
+# ---------------------------------------
+# IDEs / Sistema Operacional
+# ---------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
